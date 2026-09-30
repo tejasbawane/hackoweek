@@ -1,0 +1,51 @@
+# Import necessary libraries
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import make_blobs
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score, confusion_matrix
+
+# Generate a synthetic dataset
+X, y = make_blobs(n_samples=100, centers=2, n_features=2, random_state=1)
+
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+
+def train_model(model, X_train, y_train):
+    return model.fit(X_train, y_train)
+
+def evaluate_model(model, X_test, y_test):
+    y_pred = model.predict(X_test)
+    return accuracy_score(y_test, y_pred), confusion_matrix(y_test, y_pred)
+
+
+models = [
+    LogisticRegression(max_iter=1000),  # Simple model (low bias, high variance)
+    RandomForestClassifier(n_estimators=10),  # Moderate model (medium bias, medium variance)
+    RandomForestClassifier(n_estimators=100),  # Complex model (low bias, low variance)
+    SVC(kernel='linear'),  # Complex model (low bias, low variance)
+]
+
+
+for model in models:
+    print(f"Model: {type(model).__name__}")
+    model = train_model(model, X_train, y_train)
+    accuracy, conf_mat = evaluate_model(model, X_test, y_test)
+    print(f"Accuracy: {accuracy:.2f}")
+    print(f"Confusion Matrix:\n{conf_mat}")
+    print()
+
+
+plt.figure(figsize=(8, 6))
+plt.plot(models[0].n_iter_, models[0].cost_, label='Logistic Regression')
+plt.plot(models[1].n_estimators_, models[1].train_score_, label='Random Forest (10 est.)')
+plt.plot(models[2].n_estimators_, models[2].train_score_, label='Random Forest (100 est.)')
+plt.xlabel('Complexity')
+plt.ylabel('Training Accuracy')
+plt.title('Bias-Variance Tradeoff')
+plt.legend()
+plt.show()
